@@ -1,12 +1,16 @@
 const mongoose = require("mongoose");
+const slugify = require("slugify");
+const { geocode } = require("../utils/Geolocation");
+const geocoder = require("../utils/Geolocation");
 const BootcampSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: true,
+    required: [true, "Please add name"],
     unique: true,
     trim: true,
     maxlength: [50, "Name can not be longer than 50 characters"],
   },
+  slug: String,
   description: {
     type: String,
     required: true,
@@ -23,8 +27,8 @@ const BootcampSchema = new mongoose.Schema({
     ],
   },
   phone: {
-    type: Number,
-    match: [/^0(1\d{9}|9\d{8})$/, "This is not valid phone number"],
+    type: String,
+    maxlength: [20, "Phone number can not be longer than 20 characters"],
   },
   address: { type: String, required: true },
   email: {
@@ -94,5 +98,16 @@ const BootcampSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+});
+
+//Save slug by name bootcamp
+BootcampSchema.pre("save", async function (next) {
+  this.slug = await slugify(this.name, { lowercase: true });
+});
+
+//Create Location
+BootcampSchema.pre("save", async function (next) {
+  const location = await geocoder.geocode(this.address);
+  console.log(location);
 });
 module.exports = mongoose.model("Bootcamp", BootcampSchema);
