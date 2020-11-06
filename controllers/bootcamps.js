@@ -40,7 +40,6 @@ const getBootCampInRadius = asyncHandler(async (req, res, next) => {
   const loc = await geocoder.geocode(zipcode);
   const la = loc[0].latitude;
   const lo = loc[0].longitude;
-
   const radius = distance / 6378.1;
   const resuilt = await bootcamp.find({
     location: {
