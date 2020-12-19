@@ -4,8 +4,39 @@ const errorResponse = require("../utils/errorResponse.js");
 const geocoder = require("../utils/Geolocation.js");
 //const slugify = require("../utils/slugify.js");
 const getBootCamps = asyncHandler(async (req, res, next) => {
-  const resuilt = await bootcamp.find();
-  res.status(201).json({ success: true, message: resuilt });
+  let query;
+
+  //Copy request.query
+  let queryStr = { ...req.query };
+  const removeField = ["select", "sort"];
+  removeField.forEach((item) => delete queryStr[item]);
+  console.log(queryStr);
+  //Create Operator
+  queryStr = JSON.stringify(queryStr).replace(
+    /\b(gt|gte|lt|lte|in)\b/g,
+    (match) => `$${match}`
+  );
+
+  //Find JSON with sort
+  query = bootcamp.find(JSON.parse(queryStr));
+
+  // query select
+  if (req.query.select) {
+    const fields = req.query.select.split(",").join(" ");
+    query = query.select(fields);
+  }
+  // query sort
+  if (req.query.sort) {
+    const fields = req.query.sort.split(",").join(" ");
+    query = query.sort(fields);
+  } else {
+    query = query.sort("-createdAt");
+  }
+
+  const resuilt = await query;
+  res
+    .status(201)
+    .json({ success: true, count: resuilt.length, message: resuilt });
 });
 const getBootCamp = asyncHandler(async (req, res, next) => {
   const resuilt = await bootcamp.findById(req.params.id);
@@ -35,17 +66,24 @@ const deleteBootCamps = asyncHandler(async (req, res, next) => {
   const resuilt = await bootcamp.findByIdAndDelete(req.params.id);
   res.status(200).json({ success: true, message: resuilt });
 });
+
+let milesToRadian = function (miles) {
+  var earthRadiusInMiles = 3963;
+  return miles / earthRadiusInMiles;
+};
+
 const getBootCampInRadius = asyncHandler(async (req, res, next) => {
   const { zipcode, distance } = req.params;
   const loc = await geocoder.geocode(zipcode);
   const la = loc[0].latitude;
   const lo = loc[0].longitude;
-  const radius = distance / 6378.1;
+  const radius = milesToRadian(distance);
   const resuilt = await bootcamp.find({
     location: {
       $geoWithin: { $centerSphere: [[la, lo], radius] },
     },
   });
+  console.log(resuilt, la, lo, radius);
   res.status(200).json({
     success: true,
     count: resuilt.length,
