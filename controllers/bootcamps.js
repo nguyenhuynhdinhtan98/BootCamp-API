@@ -8,7 +8,7 @@ const getBootCamps = asyncHandler(async (req, res, next) => {
 
   //Copy request.query
   let queryStr = { ...req.query };
-  const removeField = ["select", "sort"];
+  const removeField = ["select", "sort", "page", "limit"];
   removeField.forEach((item) => delete queryStr[item]);
   console.log(queryStr);
   //Create Operator
@@ -32,11 +32,41 @@ const getBootCamps = asyncHandler(async (req, res, next) => {
   } else {
     query = query.sort("-createdAt");
   }
+  //page
+  let page = parseInt(req.query.page, 10) || 1;
+
+  //limit
+  let limit = parseInt(req.query.limit, 10) || 25;
+
+  let startIndex = (page - 1) * limit;
+
+  let endIndex = page * limit;
+
+  const total = await bootcamp.countDocuments();
+
+  query = query.skip(startIndex).limit(limit);
+  //pagination resuilt
+  const pagination = {};
+
+  if (endIndex < total) {
+    pagination.next = { page: page + 1, limit };
+  }
+  if (startIndex > 0) {
+    pagination.pre = { page: page - 1, limit };
+  }
+
+  console.log(startIndex);
+  console.log(endIndex);
+  console.log(total);
 
   const resuilt = await query;
-  res
-    .status(201)
-    .json({ success: true, count: resuilt.length, message: resuilt });
+
+  res.status(201).json({
+    success: true,
+    count: resuilt.length,
+    pagination,
+    message: resuilt,
+  });
 });
 const getBootCamp = asyncHandler(async (req, res, next) => {
   const resuilt = await bootcamp.findById(req.params.id);
