@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const slugify = require("slugify");
-const { geocode } = require("../utils/Geolocation");
+
 const geocoder = require("../utils/Geolocation");
 const BootcampSchema = new mongoose.Schema({
   name: {
@@ -124,4 +124,4 @@ BootcampSchema.pre("save", async function (next) {
 
   next();
 });
-module.exports = mongoose.model("Bootcamp", BootcampSchema);
+module.exports = mongoose.model("Bootcamps", BootcampSchema);

@@ -12,15 +12,16 @@ dotenv.config({ path: `./config/config.env` });
 connectDB();
 
 // Route files
-const router = require("./routers/Bootcamp.js");
-
+const routerBootcamp = require("./routers/Bootcamp");
+const routerCourse = require("./routers/Course");
 //Error handle
 
 // Body parser
 app.use(express.json());
 
 // Mount routers
-app.use("/api/bootcamps", router);
+app.use("/api/bootcamps", routerBootcamp);
+app.use("/api/courses", routerCourse);
 
 app.use(errorHandler);
 //Declare Port
