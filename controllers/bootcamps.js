@@ -18,7 +18,7 @@ const getBootCamps = asyncHandler(async (req, res, next) => {
   );
 
   //Find JSON with sort
-  query = bootcamp.find(JSON.parse(queryStr));
+  query = bootcamp.find(JSON.parse(queryStr)).populate("courses");
 
   // query select
   if (req.query.select) {
@@ -55,10 +55,6 @@ const getBootCamps = asyncHandler(async (req, res, next) => {
     pagination.pre = { page: page - 1, limit };
   }
 
-  console.log(startIndex);
-  console.log(endIndex);
-  console.log(total);
-
   const resuilt = await query;
 
   res.status(201).json({
@@ -94,6 +90,8 @@ const putBootCamps = asyncHandler(async (req, res, next) => {
 });
 const deleteBootCamps = asyncHandler(async (req, res, next) => {
   const resuilt = await bootcamp.findByIdAndDelete(req.params.id);
+
+  resuilt.remove();
   res.status(200).json({ success: true, message: resuilt });
 });
 
