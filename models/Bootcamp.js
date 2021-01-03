@@ -135,7 +135,7 @@ BootcampSchema.pre("remove", async function (next) {
 });
 
 BootcampSchema.virtual("courses", {
-  ref: "Courses",
+  ref: "courses",
   localField: "_id",
   foreignField: "bootcamp",
   justOne: false,
