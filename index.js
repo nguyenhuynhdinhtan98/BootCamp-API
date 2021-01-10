@@ -3,18 +3,24 @@ const morgan = require("morgan");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const colors = require("colors");
+const fileUpload = require("express-fileupload");
 const connectDB = require("./config/db.js");
 const errorHandler = require("./middleware/error");
+const path = require("path");
 const app = express();
 //Config
 dotenv.config({ path: `./config/config.env` });
 //Connection Database
 connectDB();
 
+//app upload file
+app.use(fileUpload());
+
+//set static folder
+app.use(express.static(path.join(__dirname, "public")));
 // Route files
 const routerBootcamp = require("./routers/Bootcamp");
 const routerCourse = require("./routers/Course");
-//Error handle
 
 // Body parser
 app.use(express.json());
