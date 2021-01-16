@@ -5,65 +5,8 @@ const errorResponse = require("../utils/errorResponse.js");
 const geocoder = require("../utils/Geolocation.js");
 //const slugify = require("../utils/slugify.js");
 const getBootCamps = asyncHandler(async (req, res, next) => {
-  let query;
-
-  //Copy request.query
-  let queryStr = { ...req.query };
-  const removeField = ["select", "sort", "page", "limit"];
-  removeField.forEach((item) => delete queryStr[item]);
-  // console.log(queryStr);
-  //Create Operator
-  queryStr = JSON.stringify(queryStr).replace(
-    /\b(gt|gte|lt|lte|in)\b/g,
-    (match) => `$${match}`
-  );
-
-  //Find JSON with sort
-  query = bootcamp.find(JSON.parse(queryStr)).populate("courses");
-
-  // query select
-  if (req.query.select) {
-    const fields = req.query.select.split(",").join(" ");
-    query = query.select(fields);
-  }
-  // query sort
-  if (req.query.sort) {
-    const fields = req.query.sort.split(",").join(" ");
-    query = query.sort(fields);
-  } else {
-    query = query.sort("-createdAt");
-  }
-  //page
-  let page = parseInt(req.query.page, 10) || 1;
-
-  //limit
-  let limit = parseInt(req.query.limit, 10) || 25;
-
-  let startIndex = (page - 1) * limit;
-
-  let endIndex = page * limit;
-
-  const total = await bootcamp.countDocuments();
-
-  query = query.skip(startIndex).limit(limit);
-  //pagination resuilt
-  const pagination = {};
-
-  if (endIndex < total) {
-    pagination.next = { page: page + 1, limit };
-  }
-  if (startIndex > 0) {
-    pagination.pre = { page: page - 1, limit };
-  }
-
-  const resuilt = await query;
-
-  res.status(201).json({
-    success: true,
-    count: resuilt.length,
-    pagination,
-    message: resuilt,
-  });
+  // console.log(res);
+  res.status(201).json(res.advanceResuilt);
 });
 const getBootCamp = asyncHandler(async (req, res, next) => {
   const resuilt = await bootcamp.findById(req.params.id);
